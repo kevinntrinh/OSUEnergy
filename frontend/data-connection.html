@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Connection Guide | OSU Energy Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1>🔋 OSU Energy Analytics</h1>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="data-connection.html" class="active">Data Connection</a>
+        <a href="data-pipeline.html">Data Pipeline</a>
+        <a href="energy-trends.html">Energy Trends</a>
+        <a href="efficiency-analysis.html">Efficiency</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="content-header">
+        <h1>🔌 Connect to Real Data</h1>
+        <p class="subtitle">SQL Queries for Your Actual OSU Energy Tables</p>
+      </div>
+
+      <section>
+        <div class="highlight-box">
+          <h4>⚠️ Important Note</h4>
+          <p>
+            The frontend currently shows
+            <strong>example/placeholder data</strong> for demonstration
+            purposes. Use the SQL queries below to fetch YOUR ACTUAL building
+            names, energy consumption, and analysis results from the Delta
+            tables created in your notebooks.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Your Delta Tables</h2>
+        <p class="section-description">
+          These tables were created by your Databricks notebooks and contain the
+          real OSU campus energy data.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Created By</th>
+              <th>Contains</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>workspace.default.silver_energy_joined_2025</td>
+              <td>01_load_join.ipynb</td>
+              <td>
+                Raw meter readings + building metadata + weather (Jan-Apr 2025)
+              </td>
+            </tr>
+            <tr>
+              <td>osu_energy.meters_clean</td>
+              <td>02_energy_trends.ipynb</td>
+              <td>Cleaned meter data with validated readings</td>
+            </tr>
+            <tr>
+              <td>osu_energy.daily_trend</td>
+              <td>02_energy_trends.ipynb</td>
+              <td>Daily energy aggregations by building and utility</td>
+            </tr>
+            <tr>
+              <td>osu_energy.monthly_trend</td>
+              <td>02_energy_trends.ipynb</td>
+              <td>Monthly energy aggregations</td>
+            </tr>
+            <tr>
+              <td>osu_energy.hourly_trend</td>
+              <td>02_energy_trends.ipynb</td>
+              <td>Hourly campus-wide energy patterns</td>
+            </tr>
+            <tr>
+              <td>workspace.default.priority_buildings</td>
+              <td>03_efficiency_analysis.ipynb</td>
+              <td>Top inefficient buildings from Pareto analysis</td>
+            </tr>
+            <tr>
+              <td>workspace.default.daily_efficiency</td>
+              <td>03_efficiency_analysis.ipynb</td>
+              <td>Daily energy per square meter by building</td>
+            </tr>
+            <tr>
+              <td>workspace.default.hourly_efficiency</td>
+              <td>03_efficiency_analysis.ipynb</td>
+              <td>Hourly campus-level efficiency metrics</td>
+            </tr>
+            <tr>
+              <td>workspace.default.daily_efficiency_predictions</td>
+              <td>04_regression_modelling.ipynb</td>
+              <td>ML predictions with actual vs predicted values</td>
+            </tr>
+            <tr>
+              <td>workspace.default.dashboard_daily_kpis</td>
+              <td>05_non_regression_dashboard.ipynb</td>
+              <td>Daily KPIs for dashboard visualization</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2 class="section-title">SQL Queries for Real Building Names</h2>
+
+        <div class="info-card">
+          <h3>Query 1: Get All Building Names</h3>
+          <div class="code-block">
+            <pre>
+SELECT DISTINCT
+    sitename,
+    buildingname,
+    campusname,
+    grossarea
+FROM workspace.default.silver_energy_joined_2025
+WHERE grossarea IS NOT NULL
+ORDER BY sitename
+LIMIT 100;</pre
+            >
+          </div>
+          <p style="margin-top: 1rem; color: var(--text-secondary)">
+            ✅ Use this to see actual OSU building names like "Thompson
+            Library", "Ohio Union", "Dreese Labs", etc.
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 2: Top 10 Energy Consumers</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    sitename,
+    SUM(readingvalue) as total_consumption,
+    utility,
+    COUNT(*) as reading_count
+FROM workspace.default.silver_energy_joined_2025
+WHERE readingvalue IS NOT NULL
+GROUP BY sitename, utility
+ORDER BY total_consumption DESC
+LIMIT 10;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 3: Most Inefficient Buildings (Real Data)</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    sitename,
+    ROUND(AVG(energy_per_sqm), 2) as avg_energy_per_sqm,
+    ROUND(AVG(square_meters), 0) as building_size_sqm,
+    utility,
+    campusname
+FROM workspace.default.daily_efficiency
+GROUP BY sitename, utility, campusname
+ORDER BY avg_energy_per_sqm DESC
+LIMIT 20;</pre
+            >
+          </div>
+          <p style="margin-top: 1rem; color: var(--text-secondary)">
+            🚨 This shows YOUR ACTUAL worst-performing buildings, not fake
+            examples
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 4: Priority Buildings from Pareto Analysis</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    sitename,
+    ROUND(excess_energy_kwh / 1000, 1) as excess_MWh,
+    ROUND(cumulative_pct, 1) as cumulative_percent,
+    ROUND(inefficiency_ratio, 2) as inefficiency_multiplier,
+    month,
+    utility
+FROM workspace.default.priority_buildings
+ORDER BY excess_energy_kwh DESC
+LIMIT 15;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 5: Daily Campus Summary (Real Dates)</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    day,
+    n_buildings,
+    ROUND(total_usage / 1000000, 2) as total_GWh,
+    ROUND(avg_energy_per_sqm, 2) as avg_efficiency
+FROM workspace.default.dashboard_daily_kpis
+ORDER BY day DESC
+LIMIT 30;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 6: Utility Breakdown</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    utility,
+    COUNT(DISTINCT sitename) as num_buildings,
+    ROUND(SUM(total_usage) / 1000000, 2) as total_GWh,
+    ROUND(AVG(energy_per_sqm), 2) as avg_efficiency
+FROM workspace.default.daily_efficiency
+GROUP BY utility
+ORDER BY total_GWh DESC;</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">How to Run These Queries</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>Option 1: Databricks SQL</h3>
+            <ol>
+              <li>Open Databricks workspace</li>
+              <li>Go to "SQL" → "SQL Editor"</li>
+              <li>Paste any query above</li>
+              <li>Click "Run"</li>
+              <li>Export results as CSV or JSON</li>
+            </ol>
+          </div>
+
+          <div class="info-card">
+            <h3>Option 2: In Your Notebook</h3>
+            <div class="code-block">
+              <pre>
+# Python in Databricks notebook
+df = spark.sql("""
+    SELECT sitename, 
+           AVG(energy_per_sqm) as avg_eff
+    FROM workspace.default.daily_efficiency
+    GROUP BY sitename
+    ORDER BY avg_eff DESC
+""")
+
+display(df)</pre
+              >
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>Option 3: PySpark DataFrame</h3>
+            <div class="code-block">
+              <pre>
+# Load table directly
+from pyspark.sql import functions as F
+
+buildings = spark.table(
+    "workspace.default.daily_efficiency"
+)
+
+top_inefficient = (
+    buildings
+    .groupBy("sitename")
+    .agg(F.avg("energy_per_sqm").alias("avg_eff"))
+    .orderBy(F.col("avg_eff").desc())
+    .limit(10)
+)
+
+display(top_inefficient)</pre
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Connect Frontend to Live Data</h2>
+
+        <div class="info-card">
+          <h3>🔌 Integration Options</h3>
+
+          <h4 style="margin-top: 2rem; color: var(--accent-color)">
+            1. Databricks SQL Warehouse (Recommended)
+          </h4>
+          <p>Create REST API endpoints for your queries:</p>
+          <div class="code-block">
+            <pre>
+# Install databricks-sql-connector
+pip install databricks-sql-connector
+
+# Python script to fetch data
+from databricks import sql
+
+connection = sql.connect(
+    server_hostname="your-workspace.cloud.databricks.com",
+    http_path="/sql/1.0/warehouses/your-warehouse-id",
+    access_token="your-token"
+)
+
+cursor = connection.cursor()
+cursor.execute("SELECT * FROM workspace.default.priority_buildings")
+results = cursor.fetchall()</pre
+            >
+          </div>
+
+          <h4 style="margin-top: 2rem; color: var(--accent-color)">
+            2. Export to JSON
+          </h4>
+          <p>Export query results and load them in the frontend:</p>
+          <div class="code-block">
+            <pre>
+// In your JavaScript (script.js)
+fetch('data/priority_buildings.json')
+    .then(response => response.json())
+    .then(data => {
+        // Update charts with real data
+        updateDashboard(data);
+    });</pre
+            >
+          </div>
+
+          <h4 style="margin-top: 2rem; color: var(--accent-color)">
+            3. Embed Databricks Dashboard
+          </h4>
+          <p>Create a Databricks SQL Dashboard and embed it:</p>
+          <div class="code-block">
+            <pre>
+&lt;iframe 
+    src="https://your-workspace.cloud.databricks.com/sql/dashboards/your-dashboard-id"
+    width="100%" 
+    height="800px"
+&gt;&lt;/iframe&gt;</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Quick Test: Sample Your Data</h2>
+
+        <div class="info-card">
+          <h3>Run This Query Now</h3>
+          <p>Get a quick sample of your actual building names and data:</p>
+          <div class="code-block">
+            <pre>
+-- Copy and paste into Databricks SQL Editor
+SELECT 
+    sitename as building_name,
+    buildingname as formal_name,
+    campusname as campus,
+    ROUND(grossarea, 0) as size_sqm,
+    utility,
+    ROUND(AVG(readingvalue), 2) as avg_consumption,
+    COUNT(*) as readings
+FROM workspace.default.silver_energy_joined_2025
+WHERE sitename IS NOT NULL 
+  AND readingvalue > 0
+GROUP BY sitename, buildingname, campusname, grossarea, utility
+ORDER BY RAND()
+LIMIT 10;</pre
+            >
+          </div>
+          <p style="margin-top: 1rem; color: var(--success)">
+            ✅ This will show you 10 random REAL buildings from your dataset!
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Replace Placeholder Data</h2>
+
+        <div class="info-card">
+          <h3>Where to Update</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Frontend File</th>
+                <th>What to Replace</th>
+                <th>Data Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>efficiency-analysis.html</td>
+                <td>Table rows with fake building names</td>
+                <td>Query 3: Most Inefficient Buildings</td>
+              </tr>
+              <tr>
+                <td>dashboard.html</td>
+                <td>Sample building summary data</td>
+                <td>Query 4: Priority Buildings</td>
+              </tr>
+              <tr>
+                <td>script.js</td>
+                <td>Chart data arrays (monthlyData, hourlyData, etc.)</td>
+                <td>Queries 5-6: Daily/Utility summaries</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="highlight-box" style="margin: 3rem 0">
+        <h4>🎯 Next Steps</h4>
+        <p>
+          <strong>1. Run the queries above in Databricks SQL</strong> to see
+          your actual building names<br />
+          <strong>2. Export top 10-20 results</strong> as CSV or copy the
+          data<br />
+          <strong>3. Replace placeholder examples</strong> in the HTML files
+          with your real building names<br />
+          <strong>4. (Optional) Set up Databricks SQL connector</strong> for
+          live data integration<br />
+          <strong>5. (Optional) Embed live Databricks dashboards</strong> using
+          iframe
+        </p>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 3rem;
+        "
+      >
+        <a href="data-pipeline.html" class="btn btn-primary"
+          >Continue to Data Pipeline →</a
+        >
+        <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>OSU Energy Analysis Platform | Data Connection Guide</p>
+      <p>Connect Your Real Delta Tables to the Frontend</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

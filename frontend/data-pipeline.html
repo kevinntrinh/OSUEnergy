@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Pipeline | OSU Energy Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1>🔋 OSU Energy Analytics</h1>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="data-connection.html">🔌 Connect Data</a>
+        <a href="data-pipeline.html" class="active">Data Pipeline</a>
+        <a href="energy-trends.html">Energy Trends</a>
+        <a href="efficiency-analysis.html">Efficiency</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="content-header">
+        <h1>📊 Data Engineering Pipeline</h1>
+        <p class="subtitle">Building a Unified Analytical Dataset</p>
+      </div>
+
+      <section>
+        <h2 class="section-title">Pipeline Overview</h2>
+        <p class="section-description">
+          This ETL (Extract, Transform, Load) pipeline integrates three critical
+          data sources into a single, clean, analytical dataset. The pipeline
+          follows the medallion architecture pattern: Bronze (raw), Silver
+          (cleaned), and Gold (enriched) layers, ensuring data quality and
+          accessibility for downstream analysis.
+        </p>
+      </section>
+
+      <div class="content-grid">
+        <div class="info-card">
+          <h3>🎯 Objective</h3>
+          <p>
+            Create a unified dataset that combines energy meter readings,
+            building characteristics, and weather conditions to enable
+            comprehensive energy efficiency analysis across OSU's campus.
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>⚙️ Technology Stack</h3>
+          <p>
+            <strong>PySpark:</strong> Distributed data processing<br />
+            <strong>Delta Lake:</strong> ACID transactions & versioning<br />
+            <strong>Databricks:</strong> Cloud platform & compute
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>📅 Data Period</h3>
+          <p>
+            <strong>Coverage:</strong> January - April 2025<br />
+            <strong>Granularity:</strong> Hourly energy readings<br />
+            <strong>Buildings:</strong> 100+ campus facilities
+          </p>
+        </div>
+      </div>
+
+      <section>
+        <h2 class="section-title">Data Sources</h2>
+
+        <div class="info-card">
+          <h3>1️⃣ Meter Readings (Bronze Layer)</h3>
+          <p>
+            Raw energy consumption data from campus meters across multiple
+            utilities.
+          </p>
+
+          <div class="code-block">
+            <pre>
+Source: meter-readings-*-2025.csv
+Schema:
+  - meterid: string (unique meter identifier)
+  - siteid: string (building site ID)
+  - sitename: string (building name)
+  - utility: string (ELECTRICITY, STEAM, COOLING, GAS)
+  - readingtime: timestamp (hourly readings)
+  - readingvalue: double (consumption value)
+  - readingunits: string (kWh, therms, tons, etc.)</pre
+            >
+          </div>
+
+          <div class="highlight-box">
+            <h4>📈 Data Volume</h4>
+            <p>
+              Thousands of hourly readings across 100+ buildings and 4 utility
+              types, creating a rich temporal dataset for pattern analysis.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>2️⃣ Building Metadata</h3>
+          <p>
+            Physical characteristics and location information for each campus
+            building.
+          </p>
+
+          <div class="code-block">
+            <pre>
+Source: building_metadata.csv
+Schema:
+  - buildingname: string
+  - formalname: string (official name)
+  - alsoknownas: string (aliases)
+  - grossarea: double (square meters)
+  - campusname: string (campus location)
+  - latitude: double
+  - longitude: double</pre
+            >
+          </div>
+
+          <div class="highlight-box">
+            <h4>🔑 Key Challenge</h4>
+            <p>
+              Building names in meter data don't always match metadata exactly.
+              Solution: fuzzy name matching using normalized text keys.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>3️⃣ Weather Data</h3>
+          <p>
+            Hourly weather conditions that correlate with energy consumption
+            patterns.
+          </p>
+
+          <div class="code-block">
+            <pre>
+Source: weather_data_hourly_2025.csv
+Schema:
+  - date: timestamp (hourly)
+  - temperature_2m: double (°C)
+  - relative_humidity_2m: double (%)
+  - precipitation: double (mm)
+  - wind_speed_10m: double (m/s)
+  - cloud_cover: double (%)
+  - apparent_temperature: double (°C)</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Transformation Pipeline</h2>
+
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h4>Extract</h4>
+            <p>Load CSV files into Spark DataFrames</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h4>Clean</h4>
+            <p>Type casting, null handling, standardization</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h4>Enrich</h4>
+            <p>Add temporal features (date, hour)</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h4>Join</h4>
+            <p>Fuzzy name matching + time-based joins</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">5</div>
+            <h4>Store</h4>
+            <p>Save to Delta table</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Key Transformations</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>🧹 Data Cleaning (Silver Layer)</h3>
+            <ul>
+              <li>Cast all IDs to strings for consistency</li>
+              <li>Standardize utility names (uppercase)</li>
+              <li>Parse timestamps and extract date/hour</li>
+              <li>Filter out null timestamps</li>
+              <li>Convert energy values to doubles</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>🔗 Fuzzy Name Matching</h3>
+            <p>Building name normalization algorithm:</p>
+            <ul>
+              <li>Convert to lowercase</li>
+              <li>Remove punctuation and special chars</li>
+              <li>Replace "&" with "and"</li>
+              <li>Collapse multiple spaces</li>
+              <li>Match against 3 name fields</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>⏰ Temporal Join</h3>
+            <p>Weather data joined on:</p>
+            <ul>
+              <li><strong>hour_ts:</strong> Truncated hourly timestamp</li>
+              <li>
+                <strong>Join type:</strong> Left join (preserve all meter
+                readings)
+              </li>
+              <li>
+                <strong>Result:</strong> Weather context for every energy
+                reading
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Output Schema</h2>
+
+        <div class="info-card">
+          <h3>
+            Silver Joined Table: workspace.default.silver_energy_joined_2025
+          </h3>
+          <p>
+            Final unified dataset with 25+ columns organized into logical
+            groups:
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Columns</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Time</strong></td>
+                <td>ts, hour_ts, date</td>
+                <td>Temporal analysis at various granularities</td>
+              </tr>
+              <tr>
+                <td><strong>Energy</strong></td>
+                <td>
+                  meterid, siteid, sitename, utility, readingvalue, readingunits
+                </td>
+                <td>Consumption metrics and meter identification</td>
+              </tr>
+              <tr>
+                <td><strong>Building</strong></td>
+                <td>
+                  buildingname, campusname, grossarea, latitude, longitude
+                </td>
+                <td>Physical characteristics for normalization</td>
+              </tr>
+              <tr>
+                <td><strong>Weather</strong></td>
+                <td>
+                  temperature_2m, relative_humidity_2m, precipitation,
+                  wind_speed_10m, cloud_cover, apparent_temperature
+                </td>
+                <td>Environmental context for correlation analysis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Data Quality Metrics</h2>
+
+        <div class="content-grid">
+          <div class="metric-box">
+            <div class="metric-icon">✅</div>
+            <div class="metric-value">99.8%</div>
+            <div class="metric-desc">Successful Building Matches</div>
+          </div>
+
+          <div class="metric-box">
+            <div class="metric-icon">⏱️</div>
+            <div class="metric-value">100%</div>
+            <div class="metric-desc">Hourly Weather Coverage</div>
+          </div>
+
+          <div class="metric-box">
+            <div class="metric-icon">🎯</div>
+            <div class="metric-value">0</div>
+            <div class="metric-desc">Null Timestamps</div>
+          </div>
+
+          <div class="metric-box">
+            <div class="metric-icon">🔄</div>
+            <div class="metric-value">ACID</div>
+            <div class="metric-desc">Delta Lake Transactions</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Code Highlights</h2>
+
+        <div class="info-card">
+          <h3>Name Normalization Function</h3>
+          <div class="code-block">
+            <pre>
+def norm(col):
+    x = col.cast("string")
+    x = F.lower(F.trim(x))
+    x = F.regexp_replace(x, r"&", " and ")
+    x = F.regexp_replace(x, r"[^a-z0-9 ]", " ")
+    x = F.regexp_replace(x, r"\s+", " ")
+    return x</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Multi-Field Join Logic</h3>
+          <div class="code-block">
+            <pre>
+silver_meter_buildings = m2.join(
+    b2,
+    (m2.site_name_key == b2.building_name_key) |
+    (m2.site_name_key == b2.formal_name_key) |
+    (m2.site_name_key == b2.aka_name_key),
+    "left"
+)</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Delta Table Persistence</h3>
+          <div class="code-block">
+            <pre>
+silver_joined.filter(
+    (F.col("year") == 2025) & 
+    (F.col("month").between(1, 4))
+).write.mode("overwrite") \
+ .format("delta") \
+ .saveAsTable("workspace.default.silver_energy_joined_2025")</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <div class="highlight-box" style="margin: 3rem 0">
+        <h4>🎉 Pipeline Success</h4>
+        <p>
+          The unified dataset is now available for downstream analysis teams.
+          All analysts can access
+          <strong>workspace.default.silver_energy_joined_2025</strong> without
+          duplicating ETL work, ensuring consistency and collaboration across
+          the project.
+        </p>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 3rem;
+        "
+      >
+        <a href="energy-trends.html" class="btn btn-primary"
+          >Next: Energy Trends →</a
+        >
+        <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>OSU Energy Analysis Platform | Data Pipeline Module</p>
+      <p>Built with PySpark & Delta Lake</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

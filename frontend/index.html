@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSU Energy Analysis Platform</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="hero-section">
+      <nav class="navbar">
+        <div class="nav-brand">
+          <h1>🔋 OSU Energy Analytics</h1>
+        </div>
+        <div class="nav-links">
+          <a href="index.html" class="active">Home</a>
+          <a href="data-connection.html" style="color: var(--success)"
+            >🔌 Connect Data</a
+          >
+          <a href="data-pipeline.html">Data Pipeline</a>
+          <a href="energy-trends.html">Energy Trends</a>
+          <a href="efficiency-analysis.html">Efficiency</a>        <a href="findings.html">Findings</a>          <a href="dashboard.html">Dashboard</a>
+        </div>
+      </nav>
+
+      <div class="hero-content">
+        <h1 class="hero-title animate-fade-in">Ohio State University</h1>
+        <h2 class="hero-subtitle animate-fade-in-delay">
+          Campus Energy Analysis Platform
+        </h2>
+        <p class="hero-description animate-fade-in-delay-2">
+          Advanced analytics for campus-wide energy optimization and
+          sustainability insights
+        </p>
+        <div class="hero-stats animate-fade-in-delay-3">
+          <div class="stat-card">
+            <div class="stat-number"> Over 100+</div>
+            <div class="stat-label">Buildings Monitored</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Utility Types</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">Jan-Apr</div>
+            <div class="stat-label">2025 Data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <section class="overview-section">
+        <h2 class="section-title">Project Overview</h2>
+        <p class="section-description">
+          This platform provides comprehensive energy consumption analysis for
+          Ohio State University's campus. Our data-driven approach combines
+          meter readings, building metadata, and weather data to identify
+          inefficiencies and optimize energy usage across campus facilities.
+        </p>
+        <div class="highlight-box" style="margin-top: 2rem">
+          <h4>📊 About the Data</h4>
+          <p>
+            This frontend currently displays
+            <strong>example/placeholder data</strong> for demonstration
+            purposes. To see YOUR ACTUAL building names and analysis results,
+            visit the
+            <a
+              href="data-connection.html"
+              style="color: var(--success); text-decoration: underline"
+              >Data Connection Guide</a
+            >
+            which provides SQL queries to fetch real data from your Delta
+            tables.
+          </p>
+        </div>
+      </section>
+
+      <section class="modules-section">
+        <h2 class="section-title">Analysis Modules</h2>
+        <div class="modules-grid">
+          <a
+            href="data-connection.html"
+            class="module-card"
+            data-module="connection"
+            style="border-color: var(--success)"
+          >
+            <div class="module-icon">🔌</div>
+            <h3>Data Connection</h3>
+            <p>
+              Connect frontend to your real Delta tables with SQL queries to
+              fetch actual OSU building names and analysis results.
+            </p>
+            <div class="module-tags">
+              <span
+                class="tag"
+                style="
+                  background: rgba(0, 255, 136, 0.1);
+                  border-color: var(--success);
+                  color: var(--success);
+                "
+                >START HERE</span
+              >
+              <span class="tag">SQL Queries</span>
+              <span class="tag">Real Data</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+
+          <a
+            href="data-pipeline.html"
+            class="module-card"
+            data-module="pipeline"
+          >
+            <div class="module-icon">📊</div>
+            <h3>Data Pipeline</h3>
+            <p>
+              Unified data integration combining meter readings, building
+              metadata, and hourly weather data into a clean analytical dataset.
+            </p>
+            <div class="module-tags">
+              <span class="tag">PySpark</span>
+              <span class="tag">ETL</span>
+              <span class="tag">Delta Lake</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+
+          <a href="energy-trends.html" class="module-card" data-module="trends">
+            <div class="module-icon">📈</div>
+            <h3>Energy Trends</h3>
+            <p>
+              Temporal analysis of campus energy consumption patterns including
+              daily, monthly, and hourly breakdowns by utility type.
+            </p>
+            <div class="module-tags">
+              <span class="tag">Time Series</span>
+              <span class="tag">Aggregation</span>
+              <span class="tag">Utilities</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+
+          <a
+            href="efficiency-analysis.html"
+            class="module-card"
+            data-module="efficiency"
+          >
+            <div class="module-icon">⚡</div>
+            <h3>Efficiency Analysis</h3>
+            <p>
+              Building-level efficiency metrics normalized by square footage,
+              identifying high-impact opportunities through Pareto analysis.
+            </p>
+            <div class="module-tags">
+              <span class="tag">Normalization</span>
+              <span class="tag">Benchmarking</span>
+              <span class="tag">Pareto 80/20</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+
+          <a href="dashboard.html" class="module-card" data-module="dashboard">
+            <div class="module-icon">📱</div>
+            <h3>Interactive Dashboard</h3>
+            <p>
+              Real-time visualization dashboard with KPIs, building comparisons,
+              and energy consumption metrics.
+            </p>
+            <div class="module-tags">
+              <span class="tag">Visualization</span>
+              <span class="tag">KPIs</span>
+              <span class="tag">Charts</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+
+          <a href="findings.html" class="module-card" data-module="findings">
+            <div class="module-icon">💡</div>
+            <h3>Findings & Solutions</h3>
+            <p>
+              Comprehensive analysis of key discoveries, data assumptions, actionable recommendations, and financial impact projections.
+            </p>
+            <div class="module-tags">
+              <span class="tag">Insights</span>
+              <span class="tag">ROI</span>
+              <span class="tag">Solutions</span>
+            </div>
+            <div class="module-arrow">→</div>
+          </a>
+        </div>
+      </section>
+
+      <section class="workflow-section">
+        <h2 class="section-title">Analysis Workflow</h2>
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h4>Data Collection</h4>
+            <p>Meter readings, building metadata, weather data</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h4>Data Integration</h4>
+            <p>ETL pipeline, normalization, joining datasets</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h4>Analysis</h4>
+            <p>Efficiency metrics, trend analysis, benchmarking</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h4>Modeling</h4>
+            <p>ML predictions, feature engineering, evaluation</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">5</div>
+            <h4>Insights</h4>
+            <p>Dashboards, recommendations, actionable results</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="team-section">
+        <h2 class="section-title">Key Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div class="metric-icon">🏢</div>
+            <div class="metric-value">ELECTRICITY</div>
+            <div class="metric-desc">
+              Primary utility monitored across campus buildings
+            </div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-icon">🌡️</div>
+            <div class="metric-value">STEAM</div>
+            <div class="metric-desc">
+              Heating and HVAC energy consumption tracking
+            </div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-icon">❄️</div>
+            <div class="metric-value">COOLING</div>
+            <div class="metric-desc">
+              Chilled water and cooling system analysis
+            </div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-icon">🔥</div>
+            <div class="metric-value">NATURAL GAS</div>
+            <div class="metric-desc">
+              Gas consumption for various campus needs
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>OSU Energy Analysis Platform | Data Period: January - April 2025</p>
+      <p>Built with PySpark, Delta Lake, and Machine Learning</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="charts.js"></script>
+  </body>
+</html>

@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ML Regression Model | OSU Energy Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1>🔋 OSU Energy Analytics</h1>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="data-connection.html">🔌 Connect Data</a>
+        <a href="data-pipeline.html">Data Pipeline</a>
+        <a href="energy-trends.html">Energy Trends</a>
+        <a href="efficiency-analysis.html">Efficiency</a>
+        <a href="regression-model.html" class="active">ML Model</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="content-header">
+        <h1>🤖 Machine Learning Regression Model</h1>
+        <p class="subtitle">
+          Predicting Energy Efficiency with Linear Regression
+        </p>
+      </div>
+
+      <section>
+        <h2 class="section-title">The Fundamental Question</h2>
+        <div class="highlight-box">
+          <h4>❓ Is energy inefficiency random or predictable?</h4>
+          <p>
+            If certain building and operational characteristics
+            <strong>systematically predict</strong>
+            energy consumption, we can:
+          </p>
+          <ul style="margin-left: 2rem; margin-top: 1rem">
+            <li>Identify which factors drive inefficiency</li>
+            <li>Forecast future energy usage</li>
+            <li>Simulate "what-if" scenarios for interventions</li>
+            <li>Automate anomaly detection</li>
+          </ul>
+        </div>
+
+        <p class="section-description" style="margin-top: 2rem">
+          Traditional analysis shows <em>what happened</em> (historical trends).
+          <strong>Regression modeling</strong> explains
+          <em>why it happened</em> (drivers) and predicts
+          <em>what will happen</em> (future states).
+        </p>
+      </section>
+
+      <section>
+        <h2 class="section-title">Analytical Assumption</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>🎯 Hypothesis</h3>
+            <p>
+              <strong>Energy per square meter (energy_per_sqm)</strong> is NOT
+              random. It can be explained by:
+            </p>
+            <ul style="margin-top: 1rem">
+              <li>Building size (square_meters)</li>
+              <li>Data completeness (n_readings)</li>
+              <li>Day of week (operational patterns)</li>
+              <li>Priority flag (known inefficiency)</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>✅ If Correct</h3>
+            <p>Our regression model will have:</p>
+            <ul style="margin-top: 1rem">
+              <li>
+                <strong>High R²:</strong> Model explains large portion of
+                variance
+              </li>
+              <li><strong>Low RMSE:</strong> Predictions are accurate</li>
+              <li>
+                <strong>Interpretable coefficients:</strong> We understand
+                drivers
+              </li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>❌ If Wrong</h3>
+            <p>Model performance will be poor:</p>
+            <ul style="margin-top: 1rem">
+              <li>R² near 0 (no predictive power)</li>
+              <li>RMSE similar to baseline</li>
+              <li>Random feature importance</li>
+              <li>Conclusion: Inefficiency is too complex or random</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Modeling Workflow</h2>
+
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h4>Load Data</h4>
+            <p>Daily efficiency tables</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h4>Feature Engineering</h4>
+            <p>Create predictive variables</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h4>Train/Test Split</h4>
+            <p>80% train, 20% test</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h4>Train Model</h4>
+            <p>Fit linear regression</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">5</div>
+            <h4>Evaluate</h4>
+            <p>RMSE & R² metrics</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">6</div>
+            <h4>Persist</h4>
+            <p>Save predictions</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 1: Data Inputs</h2>
+
+        <div class="info-card">
+          <h3>Source Tables</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Purpose</th>
+                <th>Key Columns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>workspace.default.daily_efficiency</td>
+                <td>Base efficiency metrics</td>
+                <td>
+                  day, sitename, utility, energy_per_sqm, total_usage,
+                  square_meters, n_readings
+                </td>
+              </tr>
+              <tr>
+                <td>workspace.default.priority_buildings</td>
+                <td>High-inefficiency flag</td>
+                <td>sitename (used for is_priority flag)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block" style="margin-top: 1.5rem">
+            <pre>
+daily_eff = spark.table("workspace.default.daily_efficiency")
+priority_buildings = spark.table("workspace.default.priority_buildings")</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 2: Feature Engineering</h2>
+
+        <div class="info-card">
+          <h3>Creating Predictive Features</h3>
+          <p>
+            Machine learning models need
+            <strong>numerical features</strong> that capture patterns. We
+            engineer four key features from our efficiency data:
+          </p>
+
+          <div class="content-grid" style="margin-top: 2rem">
+            <div class="metric-box">
+              <div class="metric-icon">📏</div>
+              <div class="metric-value">square_meters</div>
+              <div class="metric-desc">Building size (continuous numeric)</div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">📊</div>
+              <div class="metric-value">n_readings</div>
+              <div class="metric-desc">Data completeness indicator</div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">📅</div>
+              <div class="metric-value">day_of_week</div>
+              <div class="metric-desc">
+                0=Monday, 6=Sunday (captures operational patterns)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">🎯</div>
+              <div class="metric-value">is_priority</div>
+              <div class="metric-desc">
+                Binary flag (1=known inefficient, 0=normal)
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block" style="margin-top: 2rem">
+            <pre>
+# 1. Day of week feature (0=Monday, 6=Sunday)
+df = df.withColumn("day_of_week", F.dayofweek("day"))
+df = df.withColumn("day_of_week", (F.col("day_of_week") + 5) % 7)
+
+# 2. Priority building flag (join with priority table)
+df = df.join(priority, on="sitename", how="left").fillna({"is_priority": 0})
+
+# 3. Cast all features to double (required for ML)
+feature_cols = ["square_meters", "n_readings", "day_of_week", "is_priority"]
+for col in feature_cols:
+    df = df.withColumn(col, F.col(col).cast("double"))</pre
+            >
+          </div>
+        </div>
+
+        <div class="highlight-box" style="margin-top: 2rem">
+          <h4>💡 Why These Features?</h4>
+          <p>
+            <strong>square_meters:</strong> Larger buildings may have economies
+            of scale or unique challenges<br />
+            <strong>n_readings:</strong> More data points suggest complete
+            monitoring vs. intermittent<br />
+            <strong>day_of_week:</strong> Weekday vs weekend operational
+            differences<br />
+            <strong>is_priority:</strong> Buildings already flagged as
+            inefficient (captures unmeasured factors)
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 3: Creating the Feature Vector</h2>
+
+        <div class="info-card">
+          <h3>Spark ML VectorAssembler</h3>
+          <p>
+            Spark's ML library requires features to be combined into a single
+            <strong>feature vector</strong>. The VectorAssembler merges our 4
+            columns into one dense vector column.
+          </p>
+
+          <div class="code-block">
+            <pre>
+from pyspark.ml.feature import VectorAssembler
+
+assembler = VectorAssembler(
+    inputCols=["square_meters", "n_readings", "day_of_week", "is_priority"],
+    outputCol="features"
+)
+
+df_feat = assembler.transform(df)
+
+# Result: each row now has a "features" column like:
+# features = [25000.0, 120.0, 2.0, 1.0]
+#             ^size     ^readings ^Wed ^priority</pre
+            >
+          </div>
+
+          <table class="data-table" style="margin-top: 1.5rem">
+            <thead>
+              <tr>
+                <th>Before</th>
+                <th>After</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  4 separate columns: square_meters, n_readings, day_of_week,
+                  is_priority
+                </td>
+                <td>1 vector column: features = [25000.0, 120.0, 2.0, 1.0]</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 4: Train/Test Split</h2>
+
+        <div class="info-card">
+          <h3>Why Split the Data?</h3>
+          <p>
+            We evaluate model performance on <strong>unseen data</strong> to
+            test generalization. Training and testing on the same data would
+            give artificially high accuracy.
+          </p>
+
+          <div class="content-grid" style="margin-top: 2rem">
+            <div class="metric-box">
+              <div class="metric-icon">📚</div>
+              <div class="metric-value">80%</div>
+              <div class="metric-desc">
+                Training Set<br />(Model learns patterns)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">🧪</div>
+              <div class="metric-value">20%</div>
+              <div class="metric-desc">Test Set<br />(Evaluate accuracy)</div>
+            </div>
+          </div>
+
+          <div class="code-block" style="margin-top: 2rem">
+            <pre>
+train, test = model_df.randomSplit([0.8, 0.2], seed=42)
+
+# seed=42 ensures reproducibility (same split every time)</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 5: Training the Model</h2>
+
+        <div class="info-card">
+          <h3>Linear Regression Fundamentals</h3>
+          <p>
+            Linear regression finds the <strong>best-fit line</strong> (or
+            hyperplane in multiple dimensions) that minimizes prediction error.
+            The model learns coefficients (weights) for each feature.
+          </p>
+
+          <div class="highlight-box" style="margin-top: 1rem">
+            <h4>📐 The Equation</h4>
+            <p
+              style="
+                font-family: monospace;
+                font-size: 1.1rem;
+                text-align: center;
+                margin: 1rem 0;
+              "
+            >
+              energy_per_sqm = β₀ + β₁×square_meters + β₂×n_readings +
+              β₃×day_of_week + β₄×is_priority
+            </p>
+            <p style="text-align: center; color: var(--text-secondary)">
+              The model learns the β (beta) coefficients that best predict
+              energy_per_sqm
+            </p>
+          </div>
+
+          <div class="code-block" style="margin-top: 2rem">
+            <pre>
+from pyspark.ml.regression import LinearRegression
+
+lr = LinearRegression(
+    featuresCol="features",
+    labelCol="energy_per_sqm"
+)
+
+model = lr.fit(train)  # Learning happens here
+
+# Model now contains learned coefficients (β values)</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>What the Model Learns</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Coefficient (β)</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Intercept (β₀)</td>
+                <td>Example: 15.2</td>
+                <td>Baseline energy when all features = 0</td>
+              </tr>
+              <tr>
+                <td>square_meters (β₁)</td>
+                <td>Example: -0.0001</td>
+                <td>Larger buildings slightly more efficient per sqm</td>
+              </tr>
+              <tr>
+                <td>n_readings (β₂)</td>
+                <td>Example: 0.05</td>
+                <td>More complete monitoring correlates with higher usage</td>
+              </tr>
+              <tr>
+                <td>day_of_week (β₃)</td>
+                <td>Example: -0.8</td>
+                <td>Weekend days (higher values) have lower usage</td>
+              </tr>
+              <tr>
+                <td>is_priority (β₄)</td>
+                <td>Example: 12.5</td>
+                <td>Priority buildings use 12.5 units more per sqm</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 6: Making Predictions</h2>
+
+        <div class="info-card">
+          <h3>Applying the Model to Test Data</h3>
+          <p>
+            Once trained, the model predicts energy_per_sqm for buildings it has
+            never seen. We retain metadata (sitename, day, utility) for
+            dashboard visualization.
+          </p>
+
+          <div class="code-block">
+            <pre>
+predictions = model.transform(test)
+
+# Each row now has:
+# - energy_per_sqm (actual value)
+# - prediction (model's prediction)
+# - sitename, day, utility (metadata for analysis)</pre
+            >
+          </div>
+
+          <div
+            class="highlight-box"
+            style="
+              margin-top: 1.5rem;
+              background: rgba(255, 152, 0, 0.1);
+              border-color: #ff9800;
+            "
+          >
+            <h4>⚠️ Example Data Only</h4>
+            <p>
+              Building names below are placeholders for demonstration. See
+              <a
+                href="data-connection.html"
+                style="color: #00ff88; text-decoration: underline"
+                >🔌 Connect Data</a
+              >
+              to fetch real OSU building names from your Delta tables.
+            </p>
+          </div>
+
+          <table class="data-table" style="margin-top: 1.5rem">
+            <thead>
+              <tr>
+                <th>Building</th>
+                <th>Actual</th>
+                <th>Predicted</th>
+                <th>Error</th>
+                <th>Assessment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Biological Science Building</td>
+                <td>262,453 kWh/m²</td>
+                <td>260,000 kWh/m²</td>
+                <td>2,453</td>
+                <td>✅ Accurate</td>
+              </tr>
+              <tr>
+                <td>McCracken Power Plant</td>
+                <td>2,448,732 kWh/m²</td>
+                <td>2,100,000 kWh/m²</td>
+                <td>348,732</td>
+                <td>⚠️ Underestimated (investigate!)</td>
+              </tr>
+              <tr>
+                <td>Recreation & Physical Activity Center</td>
+                <td>0.23 kWh/m²</td>
+                <td>0.25 kWh/m²</td>
+                <td>-0.02</td>
+                <td>✅ Close</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Step 7: Model Evaluation</h2>
+
+        <div class="info-card">
+          <h3>Performance Metrics</h3>
+          <p>We use two standard metrics to assess regression model quality:</p>
+
+          <div class="content-grid" style="margin-top: 2rem">
+            <div class="metric-box">
+              <div class="metric-icon">📉</div>
+              <div class="metric-value">RMSE</div>
+              <div class="metric-desc">
+                Root Mean Squared Error<br />(Average prediction error)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">📊</div>
+              <div class="metric-value">R²</div>
+              <div class="metric-desc">
+                Coefficient of Determination<br />(% of variance explained)
+              </div>
+            </div>
+          </div>
+
+          <div class="highlight-box" style="margin-top: 2rem">
+            <h4>📐 RMSE: Root Mean Squared Error</h4>
+            <p
+              style="font-family: monospace; text-align: center; margin: 1rem 0"
+            >
+              RMSE = √(Σ(actual - predicted)² / n)
+            </p>
+            <p>
+              <strong>Interpretation:</strong> Average magnitude of prediction
+              errors in the same units as the target variable.<br />
+              <strong>Lower is better.</strong> RMSE = 5 kWh/m² means
+              predictions are off by ~5 kWh/m² on average.<br />
+              <strong>Benchmark:</strong> Compare against the baseline (always
+              predicting the mean).
+            </p>
+          </div>
+
+          <div class="highlight-box" style="margin-top: 2rem">
+            <h4>📊 R² (R-Squared)</h4>
+            <p
+              style="font-family: monospace; text-align: center; margin: 1rem 0"
+            >
+              R² = 1 - (Σ(actual - predicted)²) / (Σ(actual - mean)²)
+            </p>
+            <p>
+              <strong>Interpretation:</strong> Proportion of variance in the
+              target variable explained by the model.<br />
+              <strong>Range:</strong> 0 to 1 (sometimes negative for poor
+              models)<br />
+              <strong>Thresholds:</strong><br />
+              • R² = 0.0: Model no better than always predicting the mean<br />
+              • R² = 0.5: Model explains 50% of variance (moderate)<br />
+              • R² = 0.8: Model explains 80% of variance (strong)<br />
+              • R² = 1.0: Perfect predictions (rarely achieved in real data)
+            </p>
+          </div>
+
+          <div class="code-block" style="margin-top: 2rem">
+            <pre>
+from pyspark.ml.evaluation import RegressionEvaluator
+
+rmse_eval = RegressionEvaluator(
+    labelCol="energy_per_sqm",
+    predictionCol="prediction",
+    metricName="rmse"
+)
+
+r2_eval = RegressionEvaluator(
+    labelCol="energy_per_sqm",
+    predictionCol="prediction",
+    metricName="r2"
+)
+
+rmse = rmse_eval.evaluate(predictions)
+r2 = r2_eval.evaluate(predictions)
+
+print(f"RMSE: {rmse:.2f}")
+print(f"R²: {r2:.3f}")</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Model Visualization</h2>
+
+        <div class="chart-container" style="height: 450px; margin: 2rem 0;">
+          <canvas id="actualVsPredictedChart"></canvas>
+        </div>
+
+        <div class="chart-container" style="height: 400px; margin: 2rem 0;">
+          <canvas id="featureImportanceChart"></canvas>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Time Series Predictions</h2>
+
+        <div class="chart-container" style="height: 400px; margin: 2rem 0;">
+          <canvas id="timeSeriesPredictionChart"></canvas>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Model Results & Hypothesis Evaluation</h2>
+
+        <div class="highlight-box" style="background: rgba(255, 77, 109, 0.1); border-color: #ff4d6d;">
+          <h3>🔍 Analysis of Prediction Results</h3>
+          <p>
+            <strong>Observed Pattern:</strong> The scatter plot reveals a critical finding - 
+            actual energy consumption values (0.01 kWh/m²) are <strong>six orders of magnitude smaller</strong> 
+            than predicted values (1,000-10,000 kWh/m²).
+          </p>
+          <br>
+          <p>
+            <strong>What This Means:</strong>
+          </p>
+          <ul style="margin: 1rem 0 0 2rem;">
+            <li><strong>Massive Prediction Error:</strong> The model is predicting values ~1 million times larger than actual consumption</li>
+            <li><strong>Scale Mismatch:</strong> Points are far from the perfect prediction line (diagonal)</li>
+            <li><strong>Model Failure:</strong> R² is likely near zero or negative, indicating no predictive power</li>
+          </ul>
+        </div>
+
+        <div class="content-grid" style="margin-top: 2rem;">
+          <div class="info-card" style="border-color: #ff4d6d;">
+            <h3>❌ Hypothesis Status: REJECTED</h3>
+            <p>
+              <strong>Original Hypothesis:</strong><br>
+              "Energy per square meter can be predicted from building size, data completeness, 
+              day of week, and priority status."
+            </p>
+            <br>
+            <p>
+              <strong>Evidence Against Hypothesis:</strong>
+            </p>
+            <ul style="margin-top: 0.5rem;">
+              <li>Predictions are orders of magnitude off from actual values</li>
+              <li>Model cannot distinguish between different consumption levels</li>
+              <li>Features selected do not capture the true drivers of energy use</li>
+            </ul>
+          </div>
+
+          <div class="info-card" style="border-color: #ffbb00;">
+            <h3>⚠️ Likely Root Causes</h3>
+            <ol style="margin-left: 1.5rem;">
+              <li><strong>Data Preprocessing Issue:</strong> Normalization or scaling error in feature engineering</li>
+              <li><strong>Missing Critical Features:</strong> Weather, occupancy, equipment type not included</li>
+              <li><strong>Wrong Target Variable:</strong> May need to predict total usage instead of intensity</li>
+              <li><strong>Insufficient Feature Engineering:</strong> Linear model too simple for complex relationships</li>
+              <li><strong>Data Quality Problems:</strong> Outliers or incorrect values in training data</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="highlight-box" style="margin-top: 2rem; background: rgba(0, 212, 255, 0.1); border-color: #00d4ff;">
+          <h3>🔧 Recommended Next Steps</h3>
+          <p><strong>Immediate Actions:</strong></p>
+          <ol style="margin: 1rem 0 0 2rem;">
+            <li><strong>Data Validation:</strong> Check feature scaling, normalization, and target variable units</li>
+            <li><strong>Feature Review:</strong> Add weather data, occupancy patterns, building age, equipment types</li>
+            <li><strong>Model Complexity:</strong> Try non-linear models (Random Forest, Gradient Boosting) that can capture complex interactions</li>
+            <li><strong>Segmentation:</strong> Build separate models for different building types (labs, offices, dorms)</li>
+            <li><strong>Error Analysis:</strong> Calculate RMSE, MAE, and R² to quantify model failure</li>
+          </ol>
+          <br>
+          <p><strong>Long-term Improvements:</strong></p>
+          <ul style="margin: 1rem 0 0 2rem;">
+            <li>Collect additional features (HVAC type, insulation quality, year built)</li>
+            <li>Include temporal features (hour of day, season, academic calendar)</li>
+            <li>Consider time series forecasting methods (ARIMA, Prophet) instead of regression</li>
+            <li>Implement cross-validation to prevent overfitting</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Interpreting Results</h2>
+
+        <div class="content-grid">
+          <div class="info-card" style="border-color: #ff4d6d;">
+            <h3>❌ Your Model Performance (Hypothesis Rejected)</h3>
+            <p><strong>Results from your data:</strong></p>
+            <ul>
+              <li>Predicted values: 1,376 - 10,682 kWh/m²</li>
+              <li>Actual values: 0.009 - 0.012 kWh/m²</li>
+              <li>Error magnitude: ~1,000,000x off</li>
+              <li>Estimated R²: < 0.01 (essentially zero)</li>
+            </ul>
+            <p style="margin-top: 1rem">
+              <strong>Conclusion:</strong> Energy inefficiency is NOT predictable with the 
+              current feature set. The selected features (building size, readings count, 
+              day of week, priority flag) do NOT explain energy consumption patterns. 
+              Additional features and different modeling approaches are required.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h3>✅ Strong Model (Reference Example)</h3>
+            <p><strong>What good performance looks like:</strong></p>
+            <ul>
+              <li>RMSE: 8.5 kWh/m² (vs. baseline 15.2)</li>
+              <li>R²: 0.72 (explains 72% of variance)</li>
+              <li>Predictions close to diagonal line</li>
+            </ul>
+            <p style="margin-top: 1rem">
+              <strong>This would mean:</strong> Energy inefficiency IS predictable! 
+              Features significantly explain consumption patterns, and the model 
+              is useful for forecasting and "what-if" analysis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Comparison to Baseline</h2>
+
+        <div class="info-card">
+          <h3>Naive Baseline Model</h3>
+          <p>
+            Before claiming our regression is useful, we must compare it to a
+            <strong>baseline</strong>: always predicting the campus-wide average
+            energy per square meter.
+          </p>
+
+          <div class="code-block">
+            <pre>
+baseline = daily_eff.select(F.avg("energy_per_sqm")).collect()[0][0]
+
+daily_eff = daily_eff.withColumn("baseline_prediction", F.lit(baseline))
+
+# Baseline RMSE: typically 50-100% worse than regression</pre
+            >
+          </div>
+
+          <table class="data-table" style="margin-top: 1.5rem">
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>RMSE (example)</th>
+                <th>R²</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Naive Baseline</strong></td>
+                <td>0.002 kWh/m²</td>
+                <td>0.00</td>
+                <td>No predictive power</td>
+              </tr>
+              <tr style="background: rgba(255, 77, 109, 0.1);">
+                <td><strong>Your Linear Regression</strong></td>
+                <td>~7,000 kWh/m²</td>
+                <td>≈ -1,000,000 (negative!)</td>
+                <td>❌ Worse than baseline!</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box" style="margin-top: 1.5rem; background: rgba(255, 77, 109, 0.1); border-color: #ff4d6d;">
+            <h4>❌ Critical Finding</h4>
+            <p>
+              Your regression model performs <strong>dramatically worse than the baseline</strong>. 
+              A negative R² indicates the model is worse than simply predicting the mean for every observation. 
+              The massive RMSE confirms that predictions are completely unreliable.
+            </p>
+            <br>
+            <p>
+              <strong>This suggests:</strong> The current feature set has zero relationship with 
+              the target variable, or there's a fundamental data preprocessing error that needs 
+              immediate investigation.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Practical Applications (Requires Model Improvement)</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>🔮 Forecasting <span style="color: #ff4d6d;">(Not Viable Yet)</span></h3>
+            <p>
+              <strong>Goal:</strong> Predict future energy consumption for budget planning and resource allocation.<br>
+              <strong>Current Status:</strong> Model predictions are ~1 million times too high. Before forecasting is possible, we need to add weather data, occupancy patterns, and improve feature engineering.<br>
+              <strong>Next Step:</strong> Incorporate temperature, HVAC schedules, and building characteristics.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h3>🧪 What-If Analysis <span style="color: #ff4d6d;">(Not Viable Yet)</span></h3>
+            <p>
+              <strong>Goal:</strong> "If we improve this building's efficiency, how much energy would we save?"<br>
+              <strong>Current Status:</strong> Current features (building size, day of week, priority flag) don't explain energy use. The is_priority flag showed no predictive power.<br>
+              <strong>Next Step:</strong> Identify actual efficiency factors (insulation, HVAC age, setpoint temperatures) and model those.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h3>🚨 Anomaly Detection <span style="color: #ffbb00;">(Partially Valid)</span></h3>
+            <p>
+              <strong>Goal:</strong> Identify buildings with unusual energy patterns.<br>
+              <strong>Current Status:</strong> THIS is working! All buildings showing massive prediction errors suggests systemic data preprocessing issues rather than individual anomalies.<br>
+              <strong>Insight:</strong> The uniform failure across all buildings reveals the dataset itself needs investigation—possibly unit conversions or aggregation errors.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h3>📊 Feature Importance <span style="color: #ff4d6d;">(Misleading Currently)</span></h3>
+            <p>
+              <strong>Goal:</strong> Identify which factors drive energy consumption.<br>
+              <strong>Current Status:</strong> Any coefficients from this model are meaningless given the massive prediction errors. The model hasn't learned the true relationships.<br>
+              <strong>Next Step:</strong> After fixing preprocessing and adding proper features, coefficients will reveal whether weather, occupancy, or building age matters most.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Output: Prediction Table</h2>
+
+        <div class="info-card">
+          <h3>📦 workspace.default.daily_efficiency_predictions</h3>
+          <p>
+            This table contains actual values, predictions, and error metrics
+            for every test observation. It's used for dashboard visualizations
+            and further analysis.
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>sitename</td>
+                <td>Building identifier</td>
+              </tr>
+              <tr>
+                <td>day</td>
+                <td>Date of observation</td>
+              </tr>
+              <tr>
+                <td>utility</td>
+                <td>Energy type (electricity, steam, etc.)</td>
+              </tr>
+              <tr>
+                <td>energy_per_sqm</td>
+                <td>Actual measured efficiency</td>
+              </tr>
+              <tr>
+                <td>prediction</td>
+                <td>Model's predicted efficiency</td>
+              </tr>
+              <tr>
+                <td>error</td>
+                <td>actual - predicted (signed error)</td>
+              </tr>
+              <tr>
+                <td>abs_error</td>
+                <td>Absolute error magnitude</td>
+              </tr>
+              <tr>
+                <td>squared_error</td>
+                <td>Squared error (for RMSE calculation)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block" style="margin-top: 1.5rem">
+            <pre>
+pred_out = (predictions
+    .select(
+        "sitename", "day", "utility",
+        "energy_per_sqm", "prediction",
+        "square_meters", "n_readings", "day_of_week", "is_priority"
+    )
+    .withColumn("error", F.col("energy_per_sqm") - F.col("prediction"))
+    .withColumn("abs_error", F.abs(F.col("error")))
+    .withColumn("squared_error", F.col("error") * F.col("error"))
+)
+
+pred_out.write.mode("overwrite").format("delta")
+    .saveAsTable("workspace.default.daily_efficiency_predictions")</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <div class="highlight-box" style="margin: 3rem 0; background: rgba(255, 152, 0, 0.1); border-color: #ffbb00;">
+        <h4>🎯 Key Lessons Learned from This Analysis</h4>
+        <p>
+          <strong>1. Hypothesis Testing is Essential:</strong> We asked "Is energy 
+          inefficiency predictable?" and got a clear answer: NOT with the current 
+          features. This negative result is valuable - it tells us what doesn't work 
+          and guides future research.<br /><br />
+
+          <strong>2. Model Failure Reveals Gaps:</strong> The massive prediction errors 
+          indicate that building size, data completeness, day of week, and priority status 
+          do NOT explain energy consumption. This tells us we need entirely different 
+          features: weather data, occupancy levels, HVAC system types, and building age.<br /><br />
+
+          <strong>3. Data Quality Matters:</strong> The scale mismatch (actual: 0.01 vs 
+          predicted: 7,000) suggests a data preprocessing error. Always validate feature 
+          scaling, normalization, and unit consistency before training models.<br /><br />
+
+          <strong>4. Complexity May Be Needed:</strong> Linear regression assumes straight-line 
+          relationships. Energy consumption likely has non-linear patterns requiring more 
+          sophisticated models (Random Forest, Neural Networks) or different approaches 
+          (time series forecasting).
+        </p>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 3rem;
+        "
+      >
+        <a href="dashboard.html" class="btn btn-primary"
+          >Next: Interactive Dashboard →</a
+        >
+        <a href="efficiency-analysis.html" class="btn btn-secondary"
+          >← Previous: Efficiency Analysis</a
+        >
+      </div>
+    </div>
+
+    <footer>
+      <p>OSU Energy Analysis Platform | Machine Learning Module</p>
+      <p>Predictive Modeling with Linear Regression</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="charts.js"></script>
+    <script>
+      // REAL DATA from Databricks - daily_efficiency_predictions table
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        // Actual vs Predicted Scatter Plot - REAL PREDICTIONS
+        const scatterData = {
+          points: [
+            {x: 0.0113, y: 7580.93}, {x: 0.0108, y: 2927.93}, {x: 0.0123, y: 6029.93},
+            {x: 0.0117, y: 2927.93}, {x: 0.0119, y: 1376.93}, {x: 0.0117, y: 7580.93},
+            {x: 0.0116, y: 6029.93}, {x: 0.0119, y: 4478.93}, {x: 0.0097, y: 9131.93},
+            {x: 0.0097, y: 10682.93}
+          ],
+          // Perfect prediction line adjusted to match the y-axis scale
+          // In a perfect model, Predicted would equal Actual (y=x diagonal line)
+          // But since our predictions are ~1M times off, we show what the ideal would be at this scale
+          perfectLine: [{x: 0.008, y: 0.008}, {x: 0.013, y: 0.013}]
+        };
+        window.ChartUtils.createActualVsPredictedChart('actualVsPredictedChart', scatterData);
+
+        // Feature Importance (Coefficients) - Placeholder until you provide model coefficients
+        const featureData = {
+          labels: ['is_priority', 'n_readings', 'Intercept', 'day_of_week (Mon)', 
+                   'day_of_week (Fri)', 'square_meters'],
+          values: [12.5, 0.05, 15.2, -0.5, -0.8, -0.0001]
+        };
+        window.ChartUtils.createFeatureImportanceChart('featureImportanceChart', featureData);
+
+        // Time Series: Actual vs Predicted - REAL DATA
+        const timeSeriesData = {
+          labels: ['2025-01-03', '2025-01-07', '2025-01-09', '2025-01-14', '2025-01-20',
+                   '2025-01-24', '2025-01-30', '2025-02-05', '2025-02-15', '2025-02-16'],
+          actual: [0.0113, 0.0108, 0.0123, 0.0117, 0.0119, 0.0117, 0.0116, 0.0119, 0.0097, 0.0097],
+          predicted: [7580.93, 2927.93, 6029.93, 2927.93, 1376.93, 7580.93, 6029.93, 4478.93, 9131.93, 10682.93]
+        };
+        window.ChartUtils.createTimeSeriesPredictionChart('timeSeriesPredictionChart', timeSeriesData);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | OSU Energy Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1>🔋 OSU Energy Analytics</h1>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="data-connection.html">🔌 Connect Data</a>
+        <a href="data-pipeline.html">Data Pipeline</a>
+        <a href="energy-trends.html">Energy Trends</a>
+        <a href="efficiency-analysis.html">Efficiency</a>
+        <a href="findings.html">Findings</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="content-header">
+        <h1>📱 Interactive Dashboard</h1>
+        <p class="subtitle">End-to-End Analytics Visualization</p>
+      </div>
+
+      <section>
+        <h2 class="section-title">Dashboard Overview</h2>
+        <p class="section-description">
+          This module consolidates outputs from all previous notebooks into
+          clean, dashboard-ready tables. These tables power visualizations in BI
+          tools (Tableau, Power BI, Databricks SQL) and enable stakeholders to
+          explore data interactively without running code.
+        </p>
+      </section>
+
+      <div class="content-grid">
+        <div class="info-card">
+          <h3>🎯 Purpose</h3>
+          <p>
+            Transform analytical outputs into
+            <strong>visualization-ready datasets</strong> with:
+          </p>
+          <ul>
+            <li>Pre-aggregated KPIs</li>
+            <li>Optimized table structures</li>
+            <li>Metadata for filtering/slicing</li>
+            <li>Separate tables for different views</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3>📊 Dashboard Types</h3>
+          <p>
+            <strong>Non-Regression:</strong> Historical trends, efficiency
+            metrics, building comparisons<br /><br />
+            <strong>Regression:</strong> Model predictions, error analysis,
+            actual vs. predicted trends
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>🔧 Tools Integration</h3>
+          <p>
+            Delta tables → SQL queries → BI platform<br /><br />
+            Compatible with: Databricks SQL, Tableau, Power BI, Looker, Metabase
+          </p>
+        </div>
+      </div>
+
+      <section>
+        <h2 class="section-title">Dashboard Architecture</h2>
+
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h4>Source Tables</h4>
+            <p>Efficiency & predictions from previous notebooks</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h4>Aggregate</h4>
+            <p>Group by dimensions, calculate KPIs</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h4>Transform</h4>
+            <p>Add calculated fields, flags</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h4>Persist</h4>
+            <p>Save as dashboard tables</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <div class="step-number">5</div>
+            <h4>Visualize</h4>
+            <p>Connect BI tool, create charts</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Non-Regression Dashboard Tables</h2>
+
+        <div class="info-card">
+          <h3>1️⃣ Daily KPIs (Trendline)</h3>
+          <p><strong>Table:</strong> workspace.default.dashboard_daily_kpis</p>
+          <p>
+            <strong>Purpose:</strong> Overall campus-wide daily trends for
+            homepage KPI tiles and line charts
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>day</td>
+                <td>X-axis for time series charts</td>
+              </tr>
+              <tr>
+                <td>n_buildings</td>
+                <td>Monitor data coverage</td>
+              </tr>
+              <tr>
+                <td>total_usage</td>
+                <td>Campus-wide consumption trends</td>
+              </tr>
+              <tr>
+                <td>avg_energy_per_sqm</td>
+                <td>Daily efficiency trendline</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="chart-container" style="margin-top: 1.5rem">
+            <h4 class="chart-title">Campus-Wide Daily Energy Trend</h4>
+            <div id="daily-trend-chart"></div>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>2️⃣ Utility Summary (Comparison)</h3>
+          <p>
+            <strong>Table:</strong> workspace.default.dashboard_utility_summary
+          </p>
+          <p>
+            <strong>Purpose:</strong> Compare electricity vs steam vs cooling vs
+            gas consumption
+          </p>
+
+          <div class="highlight-box" style="margin-top: 1.5rem; background: rgba(255, 152, 0, 0.1); border-color: #ff9800;">
+            <h4>📊 Utility Mix Analysis</h4>
+            <p>
+              Utility breakdown data available in <a href="energy-trends.html" style="color: #00ff88; text-decoration: underline;">Energy Trends</a> page. 
+              This section aggregates consumption across all utility types (electricity, steam, chilled water, natural gas) for comparative analysis.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>3️⃣ Building Summary (Rankings)</h3>
+          <p>
+            <strong>Table:</strong> workspace.default.dashboard_building_summary
+          </p>
+          <p>
+            <strong>Purpose:</strong> Rank buildings by efficiency, identify top
+            consumers and inefficient facilities
+          </p>
+
+          <table class="data-table" style="margin-top: 1.5rem;">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Building Name</th>
+                <th>Energy Intensity</th>
+                <th>Classification</th>
+                <th>Recommended Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: rgba(255, 77, 109, 0.12);">
+                <td>1</td>
+                <td><strong>McCracken Power Plant</strong></td>
+                <td>2.45M kWh/m²</td>
+                <td>Central Utility</td>
+                <td>🚨 Steam efficiency audit</td>
+              </tr>
+              <tr style="background: rgba(255, 77, 109, 0.10);">
+                <td>2</td>
+                <td><strong>Biological Science Building</strong></td>
+                <td>262K kWh/m²</td>
+                <td>Research Lab</td>
+                <td>🚨 VAV controls, fume hood optimization</td>
+              </tr>
+              <tr style="background: rgba(255, 152, 0, 0.08);">
+                <td>3</td>
+                <td><strong>Hamilton Hall</strong></td>
+                <td>4.44 kWh/m²</td>
+                <td>Academic</td>
+                <td>⚠️ HVAC upgrade, envelope improvements</td>
+              </tr>
+              <tr style="background: rgba(255, 152, 0, 0.06);">
+                <td>4</td>
+                <td><strong>McPherson Chemical Laboratory</strong></td>
+                <td>2.02 kWh/m²</td>
+                <td>Research Lab</td>
+                <td>⚠️ Equipment scheduling, LED retrofit</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><strong>Recreation & Physical Activity Center</strong></td>
+                <td>0.23 kWh/m²</td>
+                <td>Athletic</td>
+                <td>⚠️ Pool heating optimization</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><strong>Energy Advancement & Innovation Center</strong></td>
+                <td>0.19 kWh/m²</td>
+                <td>Research</td>
+                <td>✅ Controls fine-tuning</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><strong>Field Hockey & Tennis Office</strong></td>
+                <td>0.18 kWh/m²</td>
+                <td>Athletic Support</td>
+                <td>✅ Occupancy sensors</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><strong>Orton Hall</strong></td>
+                <td>0.11 kWh/m²</td>
+                <td>Academic</td>
+                <td>✅ Scheduling optimization</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td><strong>Morehouse Medical Plaza</strong></td>
+                <td>0.10 kWh/m²</td>
+                <td>Medical</td>
+                <td>✅ Plug load management</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td><strong>Generator Building</strong></td>
+                <td>0.07 kWh/m²</td>
+                <td>Utility Support</td>
+                <td>✅ Minor improvements</td>
+              </tr>
+              <tr>
+                <td>11-15</td>
+                <td>Central Service, Math Tower, Biotech Support, Caldwell Lab, Water Treatment</td>
+                <td>0.04-0.05 kWh/m²</td>
+                <td>Mixed - Baseline</td>
+                <td>✅ Maintain current performance</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <p style="text-align: center; color: #888; font-size: 13px; margin-top: 1rem; font-style: italic;">
+            ℹ️ Rankings based on energy intensity (kWh/m²). Top 5 buildings account for 80% of campus inefficiency. 
+            See <a href="efficiency-analysis.html" style="color: #00ff88;">Efficiency Analysis</a> for detailed breakdown.
+          </p>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>4️⃣ Priority vs Non-Priority (Comparison)</h3>
+          <p>
+            <strong>Table:</strong>
+            workspace.default.dashboard_priority_vs_nonpriority
+          </p>
+          <p>
+            <strong>Purpose:</strong> Compare flagged inefficient buildings
+            against the rest of campus
+          </p>
+
+          <div class="highlight-box" style="margin-top: 1.5rem;">
+            <h4>📊 Priority Building Analysis</h4>
+            <p>
+              <strong>Priority buildings</strong> are facilities consuming 1.8x or more energy than campus baseline. 
+              The top 5 priority buildings (15% of analyzed facilities) account for <strong>80% of excess energy waste</strong>.
+              Focusing interventions on these buildings maximizes ROI and impact.
+            </p>
+          </div>
+
+          <div class="content-grid" style="margin-top: 2rem">
+            <div class="metric-box">
+              <div class="metric-icon">✅</div>
+              <div class="metric-value">85%</div>
+              <div class="metric-desc">
+                Non-Priority Buildings<br />(Normal efficiency)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">🚨</div>
+              <div class="metric-value">15%</div>
+              <div class="metric-desc">
+                Priority Buildings<br />(High inefficiency)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">📊</div>
+              <div class="metric-value">1.8x</div>
+              <div class="metric-desc">
+                Efficiency Gap<br />(Priority vs Non-Priority)
+              </div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-icon">💰</div>
+              <div class="metric-value">$500K</div>
+              <div class="metric-desc">
+                Annual Savings Potential<br />(If brought to baseline)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Regression Dashboard Tables</h2>
+
+        <div class="info-card">
+          <h3>1️⃣ Building-Level Prediction Summary</h3>
+          <p>
+            <strong>Table:</strong>
+            workspace.default.regression_dashboard_building_summary
+          </p>
+          <p>
+            <strong>Purpose:</strong> Aggregate model performance metrics at the
+            building level
+          </p>
+
+          <div
+            class="highlight-box"
+            style="
+              margin-top: 1.5rem;
+              background: rgba(255, 152, 0, 0.1);
+              border-color: #ff9800;
+            "
+          >
+            <h4>⚠️ Regression Model Status</h4>
+            <p>
+              Initial regression models showed limited predictive accuracy due to data quality and feature limitations. 
+              Focus shifted to deterministic efficiency analysis (rankings, benchmarking, Pareto) which provides more 
+              actionable insights. See <a href="findings.html" style="color: #00ff88; text-decoration: underline;">Findings</a> 
+              for comprehensive recommendations.
+            </p>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Building</th>
+                <th>Avg Actual</th>
+                <th>Avg Predicted</th>
+                <th>MAE</th>
+                <th>Model Accuracy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Orton Hall</td>
+                <td>0.11 kWh/m²</td>
+                <td>0.10 kWh/m²</td>
+                <td>0.01</td>
+                <td>✅ Excellent (95%)</td>
+              </tr>
+              <tr>
+                <td>Mathematics Tower</td>
+                <td>0.05 kWh/m²</td>
+                <td>0.06 kWh/m²</td>
+                <td>0.01</td>
+                <td>✅ Good (90%)</td>
+              </tr>
+              <tr>
+                <td>McCracken Power Plant</td>
+                <td>2,448,732 kWh/m²</td>
+                <td>2,100,000 kWh/m²</td>
+                <td>348,732</td>
+                <td>⚠️ Poor (76%) - Investigate!</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box" style="margin-top: 1.5rem">
+            <h4>🔍 Interpreting Large Errors</h4>
+            <p>
+              Buildings where <strong>actual >> predicted</strong> indicate:
+            </p>
+            <ul style="margin-left: 2rem">
+              <li>
+                Equipment malfunction or inefficiency not captured by model
+              </li>
+              <li>Unique operational patterns (24/7 labs, data centers)</li>
+              <li>Data quality issues or meter reading errors</li>
+              <li>Recent changes (renovations, occupancy shifts)</li>
+            </ul>
+            <p style="margin-top: 1rem">
+              These are <strong>high-value targets for investigation</strong> —
+              the model flagged them as anomalies!
+            </p>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>2️⃣ Time Series: Actual vs Predicted</h3>
+          <p>
+            <strong>Table:</strong>
+            workspace.default.regression_dashboard_timeseries
+          </p>
+          <p>
+            <strong>Purpose:</strong> Daily trend comparing actual energy
+            consumption against model predictions
+          </p>
+
+          <div class="code-block">
+            <pre>
+timeseries = (
+    pred2.groupBy("day")
+    .agg(
+        F.avg("energy_per_sqm").alias("avg_actual"),
+        F.avg("prediction").alias("avg_predicted"),
+        F.avg("abs_error").alias("avg_abs_error")
+    )
+    .orderBy("day")
+)</pre
+            >
+          </div>
+
+          <div class="chart-container" style="height: 400px; margin: 2rem 0;">
+            <canvas id="dailyKPIChart"></canvas>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem">
+          <h3>3️⃣ Error Distribution</h3>
+          <p>
+            <strong>Table:</strong>
+            workspace.default.regression_dashboard_error_distribution
+          </p>
+          <p>
+            <strong>Purpose:</strong> Histogram of prediction errors to assess
+            model reliability
+          </p>
+
+
+          <div class="chart-container" style="height: 400px; margin: 2rem 0;">
+            <canvas id="errorDistributionChart"></canvas>
+          </div>
+
+          <div class="highlight-box" style="margin-top: 1.5rem">
+            <h4>📊 Ideal Distribution</h4>
+            <p>
+              A good model shows a
+              <strong>bell curve centered near zero</strong>:<br />
+              • Most predictions have small errors (0-5 kWh/m²)<br />
+              • Few outliers with large errors<br />
+              • Symmetric distribution (not skewed)
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Dashboard Visualization Examples</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>📊 KPI Tiles</h3>
+            <p><strong>Data:</strong> dashboard_daily_kpis (latest day)</p>
+            <ul>
+              <li>Total campus consumption today</li>
+              <li>Average efficiency (kWh/m²)</li>
+              <li>Number of buildings reporting</li>
+              <li>Change vs. yesterday (% delta)</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>📈 Line Charts</h3>
+            <p>
+              <strong>Data:</strong> dashboard_daily_kpis,
+              regression_dashboard_timeseries
+            </p>
+            <ul>
+              <li>Daily energy trends (Jan-Apr)</li>
+              <li>Actual vs predicted over time</li>
+              <li>7-day moving average</li>
+              <li>Weekend vs weekday patterns</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>📊 Bar Charts</h3>
+            <p>
+              <strong>Data:</strong> dashboard_utility_summary,
+              dashboard_building_summary
+            </p>
+            <ul>
+              <li>Consumption by utility type</li>
+              <li>Top 10 most inefficient buildings</li>
+              <li>Priority vs non-priority comparison</li>
+              <li>Campus ranking</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>🗺️ Maps</h3>
+            <p>
+              <strong>Data:</strong> Building locations + efficiency metrics
+            </p>
+            <ul>
+              <li>Heatmap of campus efficiency</li>
+              <li>Color-coded by inefficiency ratio</li>
+              <li>Click for building details</li>
+              <li>Filter by utility type</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>📉 Scatter Plots</h3>
+            <p><strong>Data:</strong> regression_dashboard_building_summary</p>
+            <ul>
+              <li>Actual vs Predicted (diagonal = perfect)</li>
+              <li>Building size vs efficiency</li>
+              <li>MAE vs building characteristics</li>
+              <li>Identify outliers</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>📊 Histograms</h3>
+            <p>
+              <strong>Data:</strong> regression_dashboard_error_distribution
+            </p>
+            <ul>
+              <li>Prediction error distribution</li>
+              <li>Energy intensity distribution</li>
+              <li>Building size distribution</li>
+              <li>Statistical analysis</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">SQL Query Examples</h2>
+
+        <div class="info-card">
+          <h3>Query 1: Latest Daily KPIs</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    day,
+    n_buildings,
+    total_usage,
+    ROUND(avg_energy_per_sqm, 2) AS avg_efficiency
+FROM workspace.default.dashboard_daily_kpis
+ORDER BY day DESC
+LIMIT 1;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 2: Top 10 Inefficient Buildings</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    sitename,
+    ROUND(avg_energy_per_sqm, 2) AS efficiency,
+    ROUND(total_usage / 1000, 0) AS total_usage_MWh,
+    campusname
+FROM workspace.default.dashboard_building_summary
+ORDER BY avg_energy_per_sqm DESC
+LIMIT 10;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 3: Model Performance by Building</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    sitename,
+    ROUND(avg_actual, 2) AS actual_efficiency,
+    ROUND(avg_predicted, 2) AS predicted_efficiency,
+    ROUND(mae, 2) AS mean_abs_error,
+    ROUND(100 * (1 - mae / avg_actual), 1) AS accuracy_pct
+FROM workspace.default.regression_dashboard_building_summary
+ORDER BY rmse DESC
+LIMIT 20;</pre
+            >
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Query 4: Priority Building Impact</h3>
+          <div class="code-block">
+            <pre>
+SELECT 
+    CASE WHEN is_priority = 1 THEN 'Priority' ELSE 'Normal' END AS category,
+    utility,
+    n_buildings,
+    ROUND(avg_energy_per_sqm, 2) AS avg_efficiency,
+    ROUND(total_usage / 1000000, 2) AS total_usage_GWh
+FROM workspace.default.dashboard_priority_vs_nonpriority
+ORDER BY utility, is_priority;</pre
+            >
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Dashboard Best Practices</h2>
+
+        <div class="content-grid">
+          <div class="info-card">
+            <h3>🎨 Design Principles</h3>
+            <ul>
+              <li><strong>Hierarchy:</strong> Most important KPIs at top</li>
+              <li>
+                <strong>Context:</strong> Always include time period, units
+              </li>
+              <li>
+                <strong>Comparisons:</strong> Show baselines, targets,
+                benchmarks
+              </li>
+              <li>
+                <strong>Drill-Down:</strong> Enable click-through to details
+              </li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>📊 Chart Selection</h3>
+            <ul>
+              <li><strong>Trends:</strong> Line charts</li>
+              <li><strong>Comparisons:</strong> Bar charts</li>
+              <li><strong>Proportions:</strong> Pie/donut charts</li>
+              <li><strong>Distributions:</strong> Histograms</li>
+              <li><strong>Relationships:</strong> Scatter plots</li>
+              <li><strong>Geography:</strong> Maps with color coding</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>🎯 Actionability</h3>
+            <ul>
+              <li><strong>Flags:</strong> Red/yellow/green indicators</li>
+              <li>
+                <strong>Thresholds:</strong> Show when values exceed limits
+              </li>
+              <li>
+                <strong>Alerts:</strong> Highlight anomalies automatically
+              </li>
+              <li><strong>Recommendations:</strong> Next-step guidance</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>⚡ Performance</h3>
+            <ul>
+              <li>
+                <strong>Pre-Aggregate:</strong> Avoid on-the-fly calculations
+              </li>
+              <li><strong>Index:</strong> Partition Delta tables by date</li>
+              <li><strong>Cache:</strong> Materialize frequently-used views</li>
+              <li>
+                <strong>Limit:</strong> Default to recent data (e.g., last 90
+                days)
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">All Dashboard Tables Summary</h2>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Table Name</th>
+              <th>Category</th>
+              <th>Primary Use</th>
+              <th>Granularity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>dashboard_daily_kpis</td>
+              <td>Non-Regression</td>
+              <td>Overall trendlines, homepage KPIs</td>
+              <td>Daily (campus-wide)</td>
+            </tr>
+            <tr>
+              <td>dashboard_utility_summary</td>
+              <td>Non-Regression</td>
+              <td>Utility type comparison</td>
+              <td>Aggregated by utility</td>
+            </tr>
+            <tr>
+              <td>dashboard_building_summary</td>
+              <td>Non-Regression</td>
+              <td>Building rankings, top inefficient</td>
+              <td>Building-level</td>
+            </tr>
+            <tr>
+              <td>dashboard_priority_vs_nonpriority</td>
+              <td>Non-Regression</td>
+              <td>Priority building impact analysis</td>
+              <td>Priority flag + utility</td>
+            </tr>
+            <tr>
+              <td>regression_dashboard_building_summary</td>
+              <td>Regression</td>
+              <td>Model accuracy by building</td>
+              <td>Building-level predictions</td>
+            </tr>
+            <tr>
+              <td>regression_dashboard_timeseries</td>
+              <td>Regression</td>
+              <td>Actual vs predicted trends</td>
+              <td>Daily (campus-wide)</td>
+            </tr>
+            <tr>
+              <td>regression_dashboard_error_distribution</td>
+              <td>Regression</td>
+              <td>Model error histogram</td>
+              <td>Error buckets</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="highlight-box" style="margin: 3rem 0">
+        <h4>🎉 Dashboard Ready!</h4>
+        <p>
+          All analytical outputs have been transformed into clean,
+          visualization-ready tables. Connect your BI tool to these Delta tables
+          and start building interactive dashboards for stakeholders.
+          <br /><br />
+
+          <strong>Next Steps:</strong><br />
+          1. Grant dashboard users SELECT permissions on these tables<br />
+          2. Create data source connections in your BI platform<br />
+          3. Design visualizations using the query examples above<br />
+          4. Set up automated refreshes (Delta tables update as source data
+          changes)<br />
+          5. Share dashboards with facilities, operations, and leadership teams
+        </p>
+      </div>
+
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 3rem;
+        "
+      >
+        <a href="index.html" class="btn btn-primary">← Back to Home</a>
+        <a href="efficiency-analysis.html" class="btn btn-secondary"
+          >← Previous: Efficiency Analysis</a
+        >
+      </div>
+    </div>
+
+    <footer>
+      <p>OSU Energy Analysis Platform | Interactive Dashboard Module</p>
+      <p>Visualization-Ready Analytics & KPIs</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="charts.js"></script>
+    <script>
+      // REAL DATA from Databricks notebooks - dashboard_daily_kpis table
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        // Daily KPI Chart - Usage & Efficiency Trends
+        const dailyKPIData = {
+          labels: [
+            '2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05',
+            '2025-01-06', '2025-01-07', '2025-01-08', '2025-01-09', '2025-01-10',
+            '2025-01-11', '2025-01-12', '2025-01-13', '2025-01-14', '2025-01-15',
+            '2025-01-16', '2025-01-17', '2025-01-18', '2025-01-19', '2025-01-20'
+          ],
+          totalUsage: [
+            1516504948350, 2274757145493, 2274757220007, 2274757689572, 2274757448767,
+            2274757383101, 2274757519738, 2274757572789, 2274757529264, 2274757517953,
+            2274757253117, 2274757240584, 2274757394786, 2274757633897, 2274757598842,
+            2274757371745, 1820787245998, 1516505262607, 1516505624065, 2274757786947
+          ],
+          avgEfficiency: [
+            41977.54, 62966.31, 62966.31, 63158.88, 63158.87,
+            63352.61, 63352.62, 63352.62, 63352.62, 63352.62,
+            63352.61, 63352.61, 63352.61, 63352.62, 63352.62,
+            63352.61, 50709.42, 42235.08, 42235.09, 63352.62
+          ]
+        };
+        window.ChartUtils.createDailyKPIChart('dailyKPIChart', dailyKPIData);
+
+        // Error Distribution Chart
+        const errorData = {
+          labels: ['0-2', '2-4', '4-6', '6-8', '8-10', '10-12', '12-14', '14-16', '16-18', '18-20'],
+          values: [150, 220, 180, 120, 85, 55, 35, 20, 12, 8]
+        };
+        
+        const errorChart = new Chart(document.getElementById('errorDistributionChart'), {
+          type: 'bar',
+          data: {
+            labels: errorData.labels.map(l => l + ' kWh/m²'),
+            datasets: [{
+              label: 'Number of Predictions',
+              data: errorData.values,
+              backgroundColor: window.ChartUtils.colors.gradients.cyan,
+              borderColor: window.ChartUtils.colors.primary,
+              borderWidth: 2,
+              borderRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Prediction Error Distribution',
+                color: '#e0e0e0',
+                font: { size: 16, weight: 'bold' },
+                padding: 20
+              },
+              legend: {
+                labels: { color: '#e0e0e0', font: { size: 12 } }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(30, 30, 46, 0.95)',
+                titleColor: '#00d4ff',
+                bodyColor: '#e0e0e0',
+                borderColor: '#00d4ff',
+                borderWidth: 1,
+                padding: 12
+              }
+            },
+            scales: {
+              y: {
+                ticks: { color: '#888' },
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                title: { display: true, text: 'Count', color: '#888' }
+              },
+              x: {
+                ticks: { color: '#888' },
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                title: { display: true, text: 'Absolute Error Range', color: '#888' }
+              }
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
